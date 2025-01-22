@@ -1,5 +1,5 @@
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
-import { Inject, UseGuards } from '@nestjs/common'
+import { UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { User } from '../users/entity/user.entity'
 import { AuthResponse } from './dtos/AuthRes.dto'
@@ -7,8 +7,6 @@ import { CreateUserDto } from './dtos/createUserData.dto'
 import { LoginDto } from './dtos/login.dto'
 import { ResetPasswordDto } from './dtos/resetPassword.dto'
 import { ChangePasswordDto } from './dtos/changePassword.dto'
-// import { CACHE_MANAGER } from '@nestjs/cache-manager'
-// import { Cache } from 'cache-manager'
 import { CreateImagDto } from '../../common/dtos/createImage.dto'
 import { CheckEmail } from 'src/common/dtos/checkEmail.dto '
 import { RoleGuard } from 'src/common/guard/role.guard'
@@ -17,11 +15,13 @@ import { CurrentUserDto } from 'src/common/dtos/currentUser.dto'
 import { Role } from 'src/common/constant/enum.constant'
 import { Roles } from 'src/common/decerator/roles'
 import { NoToken } from 'src/common/constant/messages.constant'
+import { RedisService } from 'src/common/redis/redis.service'
 
 @Resolver(of => User)
 export class AuthResolver {
   constructor (
-    private authService: AuthService, // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly redisService: RedisService,
+    private authService: AuthService,
   ) {}
 
   @Mutation(returns => AuthResponse)
@@ -29,24 +29,24 @@ export class AuthResolver {
     @Args('createUserDto') createUserDto: CreateUserDto,
     @Args('avatar') avatar: CreateImagDto,
   ) {
-    // const userCacheKey = `user:${createUserDto.email}`
-    // const cachedUser = await this.cacheManager.get(userCacheKey)
+    const userCacheKey = `user:${createUserDto.email}`
+    const cachedUser = await this.redisService.get(userCacheKey)
 
-    // if (cachedUser) {
-    //   return { result: cachedUser }
-    // }
+    if (cachedUser) {
+      return { result: cachedUser }
+    }
 
     return await this.authService.register(createUserDto, avatar)
   }
 
   @Mutation(returns => AuthResponse)
   async login (@Args('loginDto') loginDto: LoginDto) {
-    // const userCacheKey = `user:${loginDto.email}`
-    // const cachedUser = await this.cacheManager.get(userCacheKey)
+    const userCacheKey = `user:${loginDto.email}`
+    const cachedUser = await this.redisService.get(userCacheKey)
 
-    // if (cachedUser) {
-    //   return { result: cachedUser }
-    // }
+    if (cachedUser) {
+      return { result: cachedUser }
+    }
 
     return await this.authService.login(loginDto)
   }
@@ -75,36 +75,36 @@ export class AuthResolver {
 
   @Mutation(returns => AuthResponse)
   async adminLogin (@Args('loginDto') loginDto: LoginDto) {
-    // const userCacheKey = `user:${loginDto.email}`
-    // const cachedUser = await this.cacheManager.get(userCacheKey)
+    const userCacheKey = `user:${loginDto.email}`
+    const cachedUser = await this.redisService.get(userCacheKey)
 
-    // if (cachedUser) {
-    //   return { result: cachedUser }
-    // }
+    if (cachedUser) {
+      return { result: cachedUser }
+    }
 
     return await this.authService.adminLogin(loginDto)
   }
 
   @Mutation(returns => AuthResponse)
   async managerLogin (@Args('loginDto') loginDto: LoginDto) {
-    // const userCacheKey = `user:${loginDto.email}`
-    // const cachedUser = await this.cacheManager.get(userCacheKey)
+    const userCacheKey = `user:${loginDto.email}`
+    const cachedUser = await this.redisService.get(userCacheKey)
 
-    // if (cachedUser) {
-    //   return { result: cachedUser }
-    // }
+    if (cachedUser) {
+      return { result: cachedUser }
+    }
 
     return await this.authService.managerLogin(loginDto)
   }
 
   @Mutation(returns => AuthResponse)
   async companyLogin (@Args('loginDto') loginDto: LoginDto) {
-    // const userCacheKey = `user:${loginDto.email}`
-    // const cachedUser = await this.cacheManager.get(userCacheKey)
+    const userCacheKey = `user:${loginDto.email}`
+    const cachedUser = await this.redisService.get(userCacheKey)
 
-    // if (cachedUser) {
-    //   return { result: cachedUser }
-    // }
+    if (cachedUser) {
+      return { result: cachedUser }
+    }
 
     return await this.authService.companyLogin(loginDto)
   }

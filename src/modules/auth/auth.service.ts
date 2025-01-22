@@ -17,10 +17,15 @@ import { LoginDto } from './dtos/login.dto'
 import { ComparePassword } from './utils/comparePassword'
 import { CheckEmail } from 'src/common/dtos/checkEmail.dto '
 import { Role } from 'src/common/constant/enum.constant'
+import { SendEmailService } from 'src/common/queue/services/sendemail.service'
+import { CreateImagDto } from 'src/common/dtos/createImage.dto'
+import { UploadService } from 'src/common/queue/services/upload.service'
+import { RedisService } from 'src/common/redis/redis.service'
 import { CreateUserDto } from './dtos/createUserData.dto'
 import {
   EmailIsWrong,
   EndOfEmail,
+  EnterEmailOrUserName,
   InvalidToken,
   IsnotAdmin,
   IsnotCompany,
@@ -28,18 +33,15 @@ import {
   OldPasswordENewPassword,
   SamePassword,
 } from 'src/common/constant/messages.constant'
-import { SendEmailService } from 'src/common/queue/services/sendemail.service'
-import { CreateImagDto } from 'src/common/dtos/createImage.dto'
-import { UploadService } from 'src/common/queue/services/upload.service'
 
 @Injectable()
 export class AuthService {
   constructor (
     private userService: UserService,
     private generateToken: GenerateToken,
-    private readonly sendEmailService: SendEmailService,
+    private readonly redisService: RedisService,
     private readonly uploadService: UploadService,
-    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly sendEmailService: SendEmailService,
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
@@ -77,7 +79,7 @@ export class AuthService {
       const token = await this.generateToken.jwt(user?.email, user?.id)
       const result = { user, token }
       const userCacheKey = `user:${email}`
-      // await this.cacheManager.set(userCacheKey, result, 3600)
+      await this.redisService.set(userCacheKey, result)
 
       return result
     } catch (error) {
@@ -89,16 +91,22 @@ export class AuthService {
   }
 
   async login (loginDto: LoginDto) {
-    const { email, password } = loginDto
-    const user = await this.userService.findByEmail(email.toLowerCase())
+    const { email, userName, password } = loginDto
+    if (!userName && !email) {
+      throw new BadRequestException(EnterEmailOrUserName)
+    }
+    let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      throw new NotFoundException(EmailIsWrong)
+      user = await this.userService.findByUserName(userName.toLowerCase())
+      if (!(user instanceof User)) {
+        throw new NotFoundException(EnterEmailOrUserName)
+      }
     }
 
     await ComparePassword(password, user?.password)
     const token = await this.generateToken.jwt(user?.email, user?.id)
     const userCacheKey = `user:${email}`
-    // await this.cacheManager.set(userCacheKey, { user, token }, 3600)
+    await this.redisService.set(userCacheKey, { user, token })
 
     return { user, token }
   }
@@ -185,10 +193,16 @@ export class AuthService {
   }
 
   async adminLogin (loginDto: LoginDto) {
-    const { email, password } = loginDto
-    const user = await this.userService.findByEmail(email.toLowerCase())
+    const { email, userName, password } = loginDto
+    if (!userName && !email) {
+      throw new BadRequestException(EnterEmailOrUserName)
+    }
+    let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      throw new NotFoundException(EmailIsWrong)
+      user = await this.userService.findByUserName(userName.toLowerCase())
+      if (!(user instanceof User)) {
+        throw new NotFoundException(EnterEmailOrUserName)
+      }
     }
 
     if (user.role !== (Role.ADMIN || Role.MANAGER)) {
@@ -197,16 +211,22 @@ export class AuthService {
     await ComparePassword(password, user?.password)
     const token = await this.generateToken.jwt(user?.email, user?.id)
     const userCacheKey = `user:${email}`
-    // await this.cacheManager.set(userCacheKey, { user, token }, 3600)
+    await this.redisService.set(userCacheKey, { user, token })
 
     return { user, token }
   }
 
   async companyLogin (loginDto: LoginDto) {
-    const { email, password } = loginDto
-    const user = await this.userService.findByEmail(email.toLowerCase())
+    const { email, userName, password } = loginDto
+    if (!userName && !email) {
+      throw new BadRequestException(EnterEmailOrUserName)
+    }
+    let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      throw new NotFoundException(EmailIsWrong)
+      user = await this.userService.findByUserName(userName.toLowerCase())
+      if (!(user instanceof User)) {
+        throw new NotFoundException(EnterEmailOrUserName)
+      }
     }
 
     if (user.role !== (Role.COMPANY || Role.MANAGER)) {
@@ -215,16 +235,22 @@ export class AuthService {
     await ComparePassword(password, user?.password)
     const token = await this.generateToken.jwt(user?.email, user?.id)
     const userCacheKey = `user:${email}`
-    // await this.cacheManager.set(userCacheKey, { user, token }, 3600)
+    await this.redisService.set(userCacheKey, { user, token })
 
     return { user, token }
   }
 
   async managerLogin (loginDto: LoginDto) {
-    const { email, password } = loginDto
-    const user = await this.userService.findByEmail(email.toLowerCase())
+    const { email, userName, password } = loginDto
+    if (!userName && !email) {
+      throw new BadRequestException(EnterEmailOrUserName)
+    }
+    let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      throw new NotFoundException(EmailIsWrong)
+      user = await this.userService.findByUserName(userName.toLowerCase())
+      if (!(user instanceof User)) {
+        throw new NotFoundException(EnterEmailOrUserName)
+      }
     }
 
     if (user.role === Role.MANAGER) {
@@ -233,7 +259,7 @@ export class AuthService {
     await ComparePassword(password, user?.password)
     const token = await this.generateToken.jwt(user?.email, user?.id)
     const userCacheKey = `user:${email}`
-    // await this.cacheManager.set(userCacheKey, { user, token }, 3600)
+    await this.redisService.set(userCacheKey, { user, token })
 
     return { user, token }
   }

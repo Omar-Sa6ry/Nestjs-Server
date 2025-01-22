@@ -20,6 +20,7 @@ type Query {
   sayHello: String!
   getUserById(id: Float!): User!
   getUserByEmail(checkEmail: CheckEmail!): User!
+  getUserByUserName(userName: String!): User!
   deleteUser: String!
 }
 
@@ -78,5 +79,4 @@ input UpdateUserDto {
   avatar: CreateImagDto
   email: String
   phone: String
-  addressId: Float
 }
