@@ -4,6 +4,8 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { Reflector } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
+import { NoToken } from '../constant/messages.constant'
+import { Role } from '../constant/enum.constant'
 import {
   CanActivate,
   ExecutionContext,
@@ -11,9 +13,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { NoToken } from '../constant/messages.constant'
-import { Role } from '../constant/enum.constant'
-
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor (
@@ -51,9 +50,6 @@ export class RoleGuard implements CanActivate {
         if (requiredRoles && requiredRoles.includes(user.role)) {
           request['user'] = {
             id: payload.id,
-            email: payload.email,
-            addressId: payload.addressId,
-            companyId: payload.companyId,
           }
         } else {
           throw new UnauthorizedException('Invalid token Paylod')

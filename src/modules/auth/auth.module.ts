@@ -8,15 +8,16 @@ import { UserModule } from '../users/users.module'
 import { User } from '../users/entity/user.entity'
 import { QueueModule } from 'src/common/queue/queue.module'
 import { SendEmailService } from 'src/common/queue/services/sendemail.service'
-import { UploadService } from 'src/common/queue/services/upload.service'
-import { IsUniqueConstraint } from 'src/common/decerator/isUnique.decerator'
 import { RedisModule } from 'src/common/redis/redis.module'
+import { UploadModule } from '../../common/upload/upload.module'
+import { Image } from 'src/common/upload/entity/image.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Image]),
     UserModule,
     RedisModule,
+    UploadModule,
     QueueModule,
     JwtModule.register({
       global: true,
@@ -28,7 +29,6 @@ import { RedisModule } from 'src/common/redis/redis.module'
     AuthResolver,
     AuthService,
     SendEmailService,
-    UploadService,
     GenerateToken,
     JwtService,
   ],

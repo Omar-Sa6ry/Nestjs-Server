@@ -1,16 +1,22 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
-import { Role } from 'src/common/constant/enum.constant'
+import { Role, UserStatus } from 'src/common/constant/enum.constant'
+import { Exclude } from 'class-transformer'
 import {
   AfterInsert,
   AfterRemove,
   AfterUpdate,
   Column,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
 @Entity()
 @ObjectType()
+@Index('idx_phone', ['phone'])
+@Index('idx_userName', ['userName'])
+@Index('idx_email', ['email'])
+@Index('idx_avatar', ['avatar'])
 export class User {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
@@ -24,6 +30,10 @@ export class User {
   @Field(() => String)
   avatar: string
 
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  bio: string
+
   @Column({ unique: true })
   @Field(() => String)
   phone: string
@@ -33,7 +43,7 @@ export class User {
   email: string
 
   @Column()
-  @Field(() => String)
+  @Exclude()
   password: string
 
   @Column({
@@ -41,13 +51,27 @@ export class User {
     enum: Role,
     default: Role.USER,
   })
+  @Exclude()
   role: Role
 
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.PUBLIC,
+  })
+  status: UserStatus
+
   @Column({ nullable: true })
+  @Exclude()
   resetToken?: string
 
   @Column({ type: 'timestamp', nullable: true })
+  @Exclude()
   resetTokenExpiry?: Date | null
+
+  @Column({ nullable: true })
+  @Exclude()
+  fcmToken: string
 
   @AfterInsert()
   logInsert () {

@@ -11,24 +11,22 @@ import { MoreThan, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { HashPassword } from './utils/hashPassword'
 import { randomBytes } from 'crypto'
-import { ChangePasswordDto } from './dtos/changePassword.dto'
-import { ResetPasswordDto } from './dtos/resetPassword.dto'
-import { LoginDto } from './dtos/login.dto'
+import { ChangePasswordDto } from './dtos/ChangePassword.dto'
+import { ResetPasswordDto } from './dtos/ResetPassword.dto'
+import { LoginDto } from './dtos/Login.dto'
 import { ComparePassword } from './utils/comparePassword'
 import { CheckEmail } from 'src/common/dtos/checkEmail.dto '
 import { Role } from 'src/common/constant/enum.constant'
 import { SendEmailService } from 'src/common/queue/services/sendemail.service'
 import { CreateImagDto } from 'src/common/dtos/createImage.dto'
-import { UploadService } from 'src/common/queue/services/upload.service'
 import { RedisService } from 'src/common/redis/redis.service'
-import { CreateUserDto } from './dtos/createUserData.dto'
+import { CreateUserDto } from './dtos/CreateUserData.dto'
+import { UploadService } from '../../common/upload/upload.service'
 import {
   EmailIsWrong,
   EndOfEmail,
-  EnterEmailOrUserName,
   InvalidToken,
   IsnotAdmin,
-  IsnotCompany,
   IsnotManager,
   OldPasswordENewPassword,
   SamePassword,
@@ -45,7 +43,11 @@ export class AuthService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async register (createUserDto: CreateUserDto, avatar?: CreateImagDto) {
+  async register (
+    fcmToken: string,
+    createUserDto: CreateUserDto,
+    avatar?: CreateImagDto,
+  ) {
     const { userName, phone, email } = createUserDto
     if (!email.endsWith('@gmail.com')) {
       throw new BadRequestException(EndOfEmail)
@@ -69,6 +71,7 @@ export class AuthService {
         }
       }
 
+      user.fcmToken = fcmToken
       await this.userRepository.save(user)
       await this.sendEmailService.sendEmail(
         email,
@@ -77,6 +80,7 @@ export class AuthService {
       )
 
       const token = await this.generateToken.jwt(user?.email, user?.id)
+      await this.userRepository.save(user)
       const result = { user, token }
       const userCacheKey = `user:${email}`
       await this.redisService.set(userCacheKey, result)
@@ -90,24 +94,20 @@ export class AuthService {
     }
   }
 
-  async login (loginDto: LoginDto) {
-    const { email, userName, password } = loginDto
-    if (!userName && !email) {
-      throw new BadRequestException(EnterEmailOrUserName)
-    }
+  async login (fcmToken: string, loginDto: LoginDto) {
+    const { email, password } = loginDto
+
     let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      user = await this.userService.findByUserName(userName.toLowerCase())
-      if (!(user instanceof User)) {
-        throw new NotFoundException(EnterEmailOrUserName)
-      }
+      throw new NotFoundException(EmailIsWrong)
     }
 
     await ComparePassword(password, user?.password)
     const token = await this.generateToken.jwt(user?.email, user?.id)
     const userCacheKey = `user:${email}`
     await this.redisService.set(userCacheKey, { user, token })
-
+    user.fcmToken = fcmToken
+    await this.userRepository.save(user)
     return { user, token }
   }
 
@@ -163,7 +163,7 @@ export class AuthService {
     }
   }
 
-  async changePassword (email: string, changePassword: ChangePasswordDto) {
+  async changePassword (id: number, changePassword: ChangePasswordDto) {
     const query = this.userRepository.manager.connection.createQueryRunner()
     await query.startTransaction()
 
@@ -173,7 +173,7 @@ export class AuthService {
         throw new BadRequestException(SamePassword)
       }
 
-      const user = await this.userService.findByEmail(email)
+      const user = await this.userService.findById(id)
       if (!(user instanceof User)) {
         throw new NotFoundException(EmailIsWrong)
       }
@@ -193,16 +193,11 @@ export class AuthService {
   }
 
   async adminLogin (loginDto: LoginDto) {
-    const { email, userName, password } = loginDto
-    if (!userName && !email) {
-      throw new BadRequestException(EnterEmailOrUserName)
-    }
+    const { email, password } = loginDto
+
     let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      user = await this.userService.findByUserName(userName.toLowerCase())
-      if (!(user instanceof User)) {
-        throw new NotFoundException(EnterEmailOrUserName)
-      }
+      throw new NotFoundException(EmailIsWrong)
     }
 
     if (user.role !== (Role.ADMIN || Role.MANAGER)) {
@@ -216,41 +211,12 @@ export class AuthService {
     return { user, token }
   }
 
-  async companyLogin (loginDto: LoginDto) {
-    const { email, userName, password } = loginDto
-    if (!userName && !email) {
-      throw new BadRequestException(EnterEmailOrUserName)
-    }
-    let user = await this.userService.findByEmail(email.toLowerCase())
-    if (!(user instanceof User)) {
-      user = await this.userService.findByUserName(userName.toLowerCase())
-      if (!(user instanceof User)) {
-        throw new NotFoundException(EnterEmailOrUserName)
-      }
-    }
-
-    if (user.role !== (Role.COMPANY || Role.MANAGER)) {
-      throw new UnauthorizedException(IsnotCompany)
-    }
-    await ComparePassword(password, user?.password)
-    const token = await this.generateToken.jwt(user?.email, user?.id)
-    const userCacheKey = `user:${email}`
-    await this.redisService.set(userCacheKey, { user, token })
-
-    return { user, token }
-  }
-
   async managerLogin (loginDto: LoginDto) {
-    const { email, userName, password } = loginDto
-    if (!userName && !email) {
-      throw new BadRequestException(EnterEmailOrUserName)
-    }
+    const { email, password } = loginDto
+
     let user = await this.userService.findByEmail(email.toLowerCase())
     if (!(user instanceof User)) {
-      user = await this.userService.findByUserName(userName.toLowerCase())
-      if (!(user instanceof User)) {
-        throw new NotFoundException(EnterEmailOrUserName)
-      }
+      throw new NotFoundException(EmailIsWrong)
     }
 
     if (user.role === Role.MANAGER) {

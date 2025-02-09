@@ -6,21 +6,41 @@ type User {
   id: Int!
   userName: String!
   avatar: String!
+  bio: String
   phone: String!
   email: String!
-  password: String!
 }
 
-type AuthResponse {
+type AuthOutPut {
+  message: String
+  success: Boolean
+  timeStamp: String
+  statusCode: Float
   user: User!
   token: String!
 }
 
+type AuthResponse {
+  message: String
+  success: Boolean
+  timeStamp: String
+  statusCode: Float
+  data: AuthOutPut
+}
+
+type UserResponse {
+  message: String
+  success: Boolean
+  timeStamp: String
+  statusCode: Float
+  data: User
+}
+
 type Query {
   sayHello: String!
-  getUserById(id: Float!): User!
-  getUserByEmail(checkEmail: CheckEmail!): User!
-  getUserByUserName(userName: String!): User!
+  getUserById(id: Float!): UserResponse!
+  getUserByEmail(email: CheckEmail!): UserResponse!
+  getUserByUserName(userName: String!): UserResponse!
   deleteUser: String!
 }
 
@@ -29,16 +49,15 @@ input CheckEmail {
 }
 
 type Mutation {
-  register(createUserDto: CreateUserDto!, avatar: CreateImagDto!): AuthResponse!
-  login(loginDto: LoginDto!): AuthResponse!
+  register(fcmToken: String!, createUserDto: CreateUserDto!, avatar: CreateImagDto!): AuthResponse!
+  login(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
   forgotPassword(checkEmail: CheckEmail!): String!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
   changePassword(changePasswordDto: ChangePasswordDto!): String!
-  adminLogin(loginDto: LoginDto!): AuthResponse!
-  managerLogin(loginDto: LoginDto!): AuthResponse!
-  companyLogin(loginDto: LoginDto!): AuthResponse!
+  adminLogin(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
+  managerLogin(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
   logout: Boolean!
-  updateUser(updateUserDto: UpdateUserDto!): User!
+  updateUser(updateUserDto: UpdateUserDto!): UserResponse!
   UpdateUserRole(checkEmail: CheckEmail!, companyId: Float!): String!
 }
 
@@ -60,7 +79,6 @@ scalar Upload
 
 input LoginDto {
   email: String!
-  userName: String!
   password: String!
 }
 

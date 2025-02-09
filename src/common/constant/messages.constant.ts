@@ -12,11 +12,20 @@ export const EmailIsWrong = 'Email is Wrong Check from your email'
 export const PasswordValidator = 'Password should be from 6 to 16 digits'
 export const EnterEmailOrUserName = 'You must enter your email or user name'
 export const OldPasswordENewPassword = 'old password is equal to new password'
+export const UserNameIsWrong = 'User Name Not Found'
+export const UserNotFound = 'User Not Found'
 
 // image
 export const NotSaveImage = 'Could not save image'
 export const AvatarNotFound = 'Avatar Not Found'
 export const ImageNotMatch = 'This image is not match with userId'
+export const ImagesNotFound = 'Images not Found'
 
 // Decerator
 export const CurrentUserMsg = 'User not found in request'
+
+// Cloudinary
+export const CloudinaryFailed = 'Cloudinary upload failed'
+
+// Exception filter
+export const ExceptionFilterMsg = 'An error occurred'

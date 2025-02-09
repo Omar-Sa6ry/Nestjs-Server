@@ -4,12 +4,12 @@ import { User } from './entity/user.entity'
 import { UserService } from './users.service'
 import { UserResolver } from './users.resolver'
 import { QueueModule } from 'src/common/queue/queue.module'
-import { UploadService } from 'src/common/queue/services/upload.service'
 import { RedisModule } from 'src/common/redis/redis.module'
-// import { CacheModule } from '@nestjs/cache-manager'
+import { UploadService } from '../../common/upload/upload.service'
+import { Image } from 'src/common/upload/entity/image.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), QueueModule, RedisModule],
+  imports: [TypeOrmModule.forFeature([User,Image]), QueueModule, RedisModule],
   providers: [UserService, UserResolver, UploadService],
   exports: [UserService],
 })

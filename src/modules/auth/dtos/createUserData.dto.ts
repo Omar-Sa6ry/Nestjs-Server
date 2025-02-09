@@ -6,11 +6,7 @@ import {
   IsLowercase,
   Length,
 } from 'class-validator'
-import {
-  EmailUsed,
-  PasswordValidator,
-  UserNameUsed,
-} from 'src/common/constant/messages.constant'
+import { PasswordValidator } from 'src/common/constant/messages.constant'
 
 @InputType()
 export class CreateUserDto {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { BullModule } from '@nestjs/bullmq'
 import { EmailProcessor } from './process/email.processing'
-import { UploadService } from './services/upload.service'
+import { SendEmailService } from './services/sendemail.service'
 
 @Module({
   imports: [
@@ -11,9 +11,9 @@ import { UploadService } from './services/upload.service'
         port: parseInt(process.env.REDIS_PORT, 10) || 6379,
       },
     }),
-    BullModule.registerQueue({ name: 'email' }, { name: 'image' }),
+    BullModule.registerQueue({ name: 'email' }, { name: 'image-upload' }),
   ],
-  providers: [EmailProcessor, UploadService],
+  providers: [EmailProcessor, SendEmailService],
   exports: [BullModule],
 })
 export class QueueModule {}

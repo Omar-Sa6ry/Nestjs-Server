@@ -1,8 +1,10 @@
 export enum Role {
   USER = 'user',
   ADMIN = 'admin',
-  COMPANY = 'company',
   MANAGER = 'manager',
 }
 
-
+export enum UserStatus {
+  PUBLIC = 'public',
+  PRIVACY = 'privacy',
+}
