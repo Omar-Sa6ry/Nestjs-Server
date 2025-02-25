@@ -5,7 +5,7 @@
 type User {
   id: Int!
   userName: String!
-  avatar: String!
+  avatar: String
   bio: String
   phone: String!
   email: String!
@@ -49,7 +49,7 @@ input CheckEmail {
 }
 
 type Mutation {
-  register(fcmToken: String!, createUserDto: CreateUserDto!, avatar: CreateImagDto!): AuthResponse!
+  register(fcmToken: String!, createUserDto: CreateUserDto!, avatar: CreateImagDto): AuthResponse!
   login(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
   forgotPassword(checkEmail: CheckEmail!): String!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!

@@ -26,7 +26,7 @@ export class AuthResolver {
   async register (
     @Args('fcmToken') fcmToken: string,
     @Args('createUserDto') createUserDto: CreateUserDto,
-    @Args('avatar') avatar: CreateImagDto,
+    @Args('avatar', { nullable: true }) avatar: CreateImagDto,
   ): Promise<AuthResponse> {
     return {
       statusCode: 201,
