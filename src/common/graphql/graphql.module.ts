@@ -8,7 +8,10 @@ import { join } from 'path'
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      context: ({ req }) => ({ req }),
+      context: ({ req }) => ({
+        req,
+        language: req.headers['accept-language'] || 'en',
+      }),
       playground: true,
       uploads: true,
       debug: true,
@@ -17,6 +20,10 @@ import { join } from 'path'
         const originalError = error.extensions || {}
         return {
           ...originalError,
+          message: originalError.message || error.message || 'Unknown error',
+          success: false,
+          statusCode: originalError.statusCode || 500,
+          timeStamp: new Date().toISOString().split('T')[0],
           stacktrace: undefined,
           code: undefined,
         }

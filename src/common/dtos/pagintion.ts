@@ -9,5 +9,9 @@ export class PaginationInfo {
 
   @Field(() => Int)
   @Expose()
-  currentPage: number
+  page: number
+
+  @Field(() => Int)
+  @Expose()
+  total: number
 }

@@ -15,10 +15,9 @@ import { ChangePasswordDto } from './dtos/ChangePassword.dto'
 import { ResetPasswordDto } from './dtos/ResetPassword.dto'
 import { LoginDto } from './dtos/Login.dto'
 import { ComparePassword } from './utils/comparePassword'
-import { CheckEmail } from 'src/common/dtos/checkEmail.dto '
+import { SendEmailService } from 'src/common/queues/email/sendemail.service'
 import { Role } from 'src/common/constant/enum.constant'
-import { SendEmailService } from 'src/common/queue/services/sendemail.service'
-import { CreateImagDto } from 'src/common/dtos/createImage.dto'
+import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto'
 import { RedisService } from 'src/common/redis/redis.service'
 import { CreateUserDto } from './dtos/CreateUserData.dto'
 import { UploadService } from '../../common/upload/upload.service'
@@ -31,6 +30,7 @@ import {
   OldPasswordENewPassword,
   SamePassword,
 } from 'src/common/constant/messages.constant'
+import { AuthInput } from './input/Auth.input'
 
 @Injectable()
 export class AuthService {
@@ -47,7 +47,7 @@ export class AuthService {
     fcmToken: string,
     createUserDto: CreateUserDto,
     avatar?: CreateImagDto,
-  ) {
+  ): Promise<AuthInput> {
     const { userName, phone, email } = createUserDto
     if (!email.endsWith('@gmail.com')) {
       throw new BadRequestException(EndOfEmail)
@@ -64,7 +64,7 @@ export class AuthService {
       })
       await this.userRepository.save(user)
 
-      if (avatar.name) {
+      if (avatar) {
         const filename = await this.uploadService.uploadImage(avatar)
         if (typeof filename === 'string') {
           user.avatar = filename
@@ -82,8 +82,8 @@ export class AuthService {
       const token = await this.generateToken.jwt(user?.email, user?.id)
       await this.userRepository.save(user)
       const result = { user, token }
-      const userCacheKey = `user:${email}`
-      await this.redisService.set(userCacheKey, result)
+      // const userCacheKey = `user:${email}`
+      // await this.redisService.set(userCacheKey, result)
 
       return result
     } catch (error) {
@@ -111,8 +111,8 @@ export class AuthService {
     return { user, token }
   }
 
-  async forgotPassword (forgotPasswordDto: CheckEmail) {
-    const lowerEmail = forgotPasswordDto.email.toLowerCase()
+  async forgotPassword (email: string) {
+    const lowerEmail = email.toLowerCase()
     const user = await this.userService.findByEmail(lowerEmail)
     if (!(user instanceof User)) {
       throw new NotFoundException(EmailIsWrong)

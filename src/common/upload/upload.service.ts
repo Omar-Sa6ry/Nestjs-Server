@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { CreateImagDto } from 'src/common/dtos/createImage.dto'
+import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto'
 import { UploadApiResponse } from 'cloudinary'
 import { ConfigService } from '@nestjs/config'
 import { configureCloudinary } from 'src/common/config/cloudinary'

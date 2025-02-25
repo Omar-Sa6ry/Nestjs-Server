@@ -6,11 +6,11 @@ import { AuthService } from './auth.service'
 import { GenerateToken } from '../../common/config/jwt.service'
 import { UserModule } from '../users/users.module'
 import { User } from '../users/entity/user.entity'
-import { QueueModule } from 'src/common/queue/queue.module'
-import { SendEmailService } from 'src/common/queue/services/sendemail.service'
 import { RedisModule } from 'src/common/redis/redis.module'
 import { UploadModule } from '../../common/upload/upload.module'
 import { Image } from 'src/common/upload/entity/image.entity'
+import { EmailModule } from 'src/common/queues/email/email.module'
+import { SendEmailService } from 'src/common/queues/email/sendemail.service'
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { Image } from 'src/common/upload/entity/image.entity'
     UserModule,
     RedisModule,
     UploadModule,
-    QueueModule,
+    EmailModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'huigyufutftydty',

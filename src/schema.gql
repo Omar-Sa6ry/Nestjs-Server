@@ -12,10 +12,6 @@ type User {
 }
 
 type AuthOutPut {
-  message: String
-  success: Boolean
-  timeStamp: String
-  statusCode: Float
   user: User!
   token: String!
 }
@@ -39,26 +35,22 @@ type UserResponse {
 type Query {
   sayHello: String!
   getUserById(id: Float!): UserResponse!
-  getUserByEmail(email: CheckEmail!): UserResponse!
+  getUserByEmail(email: String!): UserResponse!
   getUserByUserName(userName: String!): UserResponse!
   deleteUser: String!
 }
 
-input CheckEmail {
-  email: String!
-}
-
 type Mutation {
-  register(fcmToken: String!, createUserDto: CreateUserDto!, avatar: CreateImagDto): AuthResponse!
+  register(fcmToken: String!, createUserDto: CreateUserDto!): AuthResponse!
   login(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
-  forgotPassword(checkEmail: CheckEmail!): String!
+  forgotPassword(email: String!): String!
   resetPassword(resetPasswordDto: ResetPasswordDto!): String!
   changePassword(changePasswordDto: ChangePasswordDto!): String!
   adminLogin(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
   managerLogin(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
   logout: Boolean!
   updateUser(updateUserDto: UpdateUserDto!): UserResponse!
-  UpdateUserRole(checkEmail: CheckEmail!, companyId: Float!): String!
+  UpdateUserRole(email: String!, companyId: Float!): String!
 }
 
 input CreateUserDto {
@@ -67,15 +59,6 @@ input CreateUserDto {
   password: String!
   phone: String!
 }
-
-input CreateImagDto {
-  name: String!
-  breed: String!
-  image: Upload!
-}
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload
 
 input LoginDto {
   email: String!
@@ -98,3 +81,12 @@ input UpdateUserDto {
   email: String
   phone: String
 }
+
+input CreateImagDto {
+  name: String!
+  breed: String!
+  image: Upload!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

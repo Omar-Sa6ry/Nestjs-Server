@@ -4,7 +4,6 @@ import { UserService } from './users.service'
 import { ParseIntPipe } from '@nestjs/common'
 import { UpdateUserDto } from './dtos/UpdateUser.dto'
 import { Role } from 'src/common/constant/enum.constant'
-import { CheckEmail } from 'src/common/dtos/checkEmail.dto '
 import { CurrentUserDto } from 'src/common/dtos/currentUser.dto'
 import { CurrentUser } from 'src/common/decerator/currentUser.decerator'
 import { RedisService } from 'src/common/redis/redis.service'
@@ -34,10 +33,7 @@ export class UserResolver {
 
   @Query(returns => UserResponse)
   @Auth(Role.ADMIN, Role.MANAGER)
-  async getUserByEmail (
-    @Args('email') checkEmail: CheckEmail,
-  ): Promise<UserResponse> {
-    const email: string = checkEmail.email
+  async getUserByEmail (@Args('email') email: string): Promise<UserResponse> {
     const userCacheKey = `user:${email}`
     const cachedUser = await this.redisService.get(userCacheKey)
     if (cachedUser instanceof User) {
@@ -78,10 +74,9 @@ export class UserResolver {
   @Mutation(returns => String)
   @Auth(Role.ADMIN, Role.MANAGER)
   async UpdateUserRole (
-    @Args('checkEmail') checkEmail: CheckEmail,
+    @Args('email') email: string,
     @Args('companyId', ParseIntPipe) companyId: number,
   ) {
-    const email = checkEmail.email
     return await this.usersService.editUserRole(email)
   }
 }

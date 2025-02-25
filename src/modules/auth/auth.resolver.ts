@@ -6,8 +6,7 @@ import { CreateUserDto } from './dtos/CreateUserData.dto'
 import { LoginDto } from './dtos/Login.dto'
 import { ResetPasswordDto } from './dtos/ResetPassword.dto'
 import { ChangePasswordDto } from './dtos/ChangePassword.dto'
-import { CreateImagDto } from '../../common/dtos/createImage.dto'
-import { CheckEmail } from 'src/common/dtos/checkEmail.dto '
+import { CreateImagDto } from '../../common/upload/dtos/createImage.dto'
 import { CurrentUser } from 'src/common/decerator/currentUser.decerator'
 import { CurrentUserDto } from 'src/common/dtos/currentUser.dto'
 import { Role } from 'src/common/constant/enum.constant'
@@ -26,11 +25,13 @@ export class AuthResolver {
   async register (
     @Args('fcmToken') fcmToken: string,
     @Args('createUserDto') createUserDto: CreateUserDto,
-    @Args('avatar', { nullable: true }) avatar: CreateImagDto,
+    // @Args('avatar', { nullable: true }) avatar?: CreateImagDto,
   ): Promise<AuthResponse> {
+    console.log('nferuhbu')
     return {
       statusCode: 201,
-      data: await this.authService.register(fcmToken, createUserDto, avatar),
+      message: 'you signup successfully',
+      data: await this.authService.register(fcmToken, createUserDto),
     }
   }
 
@@ -50,8 +51,8 @@ export class AuthResolver {
   }
 
   @Mutation(returns => String)
-  async forgotPassword (@Args('checkEmail') checkEmail: CheckEmail) {
-    await this.authService.forgotPassword(checkEmail)
+  async forgotPassword (@Args('email') email: string) {
+    await this.authService.forgotPassword(email)
   }
 
   @Mutation(returns => String)

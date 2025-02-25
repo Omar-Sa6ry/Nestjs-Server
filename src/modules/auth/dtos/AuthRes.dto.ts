@@ -4,7 +4,7 @@ import { BaseResponse } from 'src/common/dtos/BaseResponse'
 import { User } from 'src/modules/users/entity/user.entity'
 
 @ObjectType()
-export class AuthOutPut extends BaseResponse {
+export class AuthOutPut  {
   @Field(() => User)
   @Expose()
   user: User

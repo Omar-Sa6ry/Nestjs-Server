@@ -15,12 +15,14 @@ export class GeneralResponseInterceptor<T> implements NestInterceptor<T, any> {
       map(data => {
         return {
           success: true,
-          statusCode: data.statusCode || 200,
-          message: data.message || 'Request successful',
+          statusCode: data?.statusCode || 200,
+          message: data?.message || 'Request successful',
           timeStamp: new Date().toISOString().split('T')[0],
-          pagination: data.pagination,
-          items: Array.isArray(data.items) ? data.items : data?.data.items,
-          data: Array.isArray(data) ? data : data?.data,
+          pagination: data?.pagination,
+          items: Array.isArray(data?.items)
+            ? data.items
+            : data?.data?.items || [],
+          data: Array.isArray(data) ? data : data?.data || {},
         }
       }),
 
@@ -30,10 +32,10 @@ export class GeneralResponseInterceptor<T> implements NestInterceptor<T, any> {
             new GraphQLError(error.message || 'An error occurred', {
               extensions: {
                 success: false,
-                statusCode: error.status,
-                message: error.message || 'An error occurred',
+                statusCode: error?.status || 500,
+                message: error?.message || 'An error occurred',
                 timeStamp: new Date().toISOString().split('T')[0],
-                error: error.response.error,
+                error: error?.response?.error || 'Unknown error',
               },
             }),
         )

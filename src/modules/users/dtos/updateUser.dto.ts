@@ -1,11 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql'
-import { CreateImagDto } from 'src/common/dtos/createImage.dto'
-import {
-  IsEmail,
-  IsString,
-  IsPhoneNumber,
-  IsOptional,
-} from 'class-validator'
+import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto'
+import { IsEmail, IsString, IsPhoneNumber, IsOptional } from 'class-validator'
 
 @InputType()
 export class UpdateUserDto {
